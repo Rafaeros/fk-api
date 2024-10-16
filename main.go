@@ -3,8 +3,9 @@ package main
 import (
 	"log"
 	"net/http"
+
 	"github.com/gorilla/mux"
-	"github.com/Rafaeros/fk-api/api/routers"
+	"github.com/rafaeros/fk-api/api/routers"
 )
 
 func main() {
@@ -14,7 +15,7 @@ func main() {
 	r = routers.RoutersOrdemProducao(r, basePath)
 
 	log.Println("Setting up handlers")
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc(basePath, func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Handling '/'")
 		w.Write([]byte("Hello World"))
 	}).Methods(http.MethodGet)
