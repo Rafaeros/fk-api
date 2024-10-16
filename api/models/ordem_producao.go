@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 	"database/sql"
-	"github.com/Rafaeros/fk-api/api/connection"
+	"github.com/rafaeros/fk-api/api/connection"
 )
 
 type OrdemProducao struct {
@@ -21,6 +21,7 @@ type OrdemProducao struct {
 }
 
 func CreateTableOrdemProducao(db *sql.DB) error {
+
 	_, err := db.Exec(`
 	CREATE TABLE IF NOT EXISTS OrdemProducao (
 		IDOrdemProducao INTEGER PRIMARY KEY,
@@ -33,7 +34,9 @@ func CreateTableOrdemProducao(db *sql.DB) error {
 		DataCriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		DataAtualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		IsAtivo BOOLEAN DEFAULT TRUE
+		);
 	`)
+	
 	return err
 }
 

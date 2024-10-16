@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"github.com/gorilla/mux"
-	"github.com/Rafaeros/fk-api/api/models"
-	"github.com/Rafaeros/fk-api/api/connection"
+	"github.com/rafaeros/fk-api/api/models"
+	"github.com/rafaeros/fk-api/api/connection"
 )
 
 func RoutersOrdemProducao(routers *mux.Router, base string) *mux.Router {
@@ -24,9 +24,11 @@ func CreateTableOrdemProducaoHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "Error connecting to database:", err)
 		return
 	}
+	defer db.Close()
+
 	err = models.CreateTableOrdemProducao(db)
 	if err != nil {
-		fmt.Fprint(w, "Error creating table:", err)
+		fmt.Fprint(w, "Error creating table: ", err)
 		return
 	}
 
@@ -34,5 +36,5 @@ func CreateTableOrdemProducaoHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateOrdemProducaoHandler(w http.ResponseWriter, r *http.Request) {
-
+	
 }
