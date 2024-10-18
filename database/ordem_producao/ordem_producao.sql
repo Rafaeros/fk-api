@@ -1,0 +1,24 @@
+CREATE TABLE IF NOT EXISTS Clientes (
+	IDCliente INTEGER PRIMARY KEY,
+	Nome TEXT UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS Material (
+	IDMaterial INTEGER PRIMARY KEY,
+	CodigoMaterial TEXT UNIQUE,
+	DescricaoMaterial TEXT UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS OrdemProducao (
+		IDOrdemProducao INTEGER PRIMARY KEY,
+		DataEntrega TEXT,
+		CodigoOrdemProducao INTEGER UNIQUE,
+		IDCliente INT,
+		IDMaterial INT,
+		Quantidade INTEGER,
+		DataCriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		DataAtualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		IsAtivo BOOLEAN DEFAULT TRUE,
+		FOREIGN KEY (IDCliente) REFERENCES Clientes(IDCliente),
+		FOREIGN KEY (IDMaterial) REFERENCES Material(IDMaterial)
+);

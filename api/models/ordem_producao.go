@@ -16,6 +16,8 @@ type OrdemProducao struct {
 	DataCriacao         time.Time `json:"dataCriacao"`
 	DataAtualizacao     time.Time `json:"dataAtualizacao"`
 	IsAtivo             bool      `json:"isAtivo"`
+	IDCliente	int64 `json:"IDCliente"`
+	IDMaterial int64 `json:"IDMaterial"`
 }
 
 type OrdensDeProducao struct {
@@ -25,20 +27,30 @@ type OrdensDeProducao struct {
 func CreateTableOrdemProducao(db *sql.DB) error {
 
 	_, err := db.Exec(`
-	CREATE TABLE IF NOT EXISTS OrdemProducao (
-		IDOrdemProducao INTEGER PRIMARY KEY,
-		DataEntrega TEXT,
-		CodigoOrdemProducao INTEGER UNIQUE,
-		Cliente TEXT,
-		CodigoMaterial TEXT,
-		DescricaoMaterial TEXT,
-		Quantidade INTEGER,
-		DataCriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-		DataAtualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-		IsAtivo BOOLEAN DEFAULT TRUE
+		CREATE TABLE IF NOT EXISTS Clientes (
+			IDCliente INTEGER PRIMARY KEY,
+			Nome TEXT UNIQUE
+		);
+		CREATE TABLE IF NOT EXISTS Material (
+			IDMaterial INTEGER PRIMARY KEY,
+			CodigoMaterial TEXT UNIQUE,
+			DescricaoMaterial TEXT UNIQUE
+		);
+		CREATE TABLE IF NOT EXISTS OrdemProducao (
+			IDOrdemProducao INTEGER PRIMARY KEY,
+			DataEntrega TEXT,
+			CodigoOrdemProducao INTEGER UNIQUE,
+			IDCliente INT,
+			IDMaterial INT,
+			Quantidade INTEGER,
+			DataCriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			DataAtualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			IsAtivo BOOLEAN DEFAULT TRUE,
+			FOREIGN KEY (IDCliente) REFERENCES Clientes(IDCliente),
+			FOREIGN KEY (IDMaterial) REFERENCES Material(IDMaterial)
 		);
 	`)
-
+	
 	return err
 }
 
@@ -47,9 +59,8 @@ func GetOrdemProducao(db *sql.DB) ([]OrdemProducao, error) {
 	query := `SELECT IDOrdemProducao, 
 		DataEntrega,
 		CodigoOrdemProducao,
-		Cliente,
-		CodigoMaterial,
-	  	DescricaoMaterial,
+		IDCliente,
+		IDMaterial,
 	   	Quantidade,
 	    DataCriacao,
 		DataAtualizacao,
@@ -68,9 +79,8 @@ func GetOrdemProducao(db *sql.DB) ([]OrdemProducao, error) {
 			&o.IDOrdemProducao,
 			&o.DataEntrega,
 			&o.CodigoOrdemProducao,
-			&o.Cliente,
-			&o.CodigoMaterial,
-			&o.DescricaoMaterial,
+			&o.IDCliente,
+			&o.IDMaterial,
 			&o.Quantidade,
 			&o.DataCriacao,
 			&o.DataAtualizacao,
@@ -90,10 +100,35 @@ func GetOrdemProducao(db *sql.DB) ([]OrdemProducao, error) {
 
 func (o *OrdemProducao) CreateOrdemProducao(db *sql.DB) error {
 
-	insertQuery := `INSERT INTO OrdemProducao (DataEntrega, CodigoOrdemProducao, Cliente, CodigoMaterial, DescricaoMaterial, Quantidade) VALUES (?, ?, ?, ?, ?, ?);`
+	insertClientQuery := `INSERT OR IGNORE INTO CLIENTES (Nome) VALUES (?)`
+
+	res, err := db.Exec(insertClientQuery, o.Cliente)
+	if err != nil {
+		return err
+	}
+
+	IDCliente, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	insertMaterialQuery := `INSERT OR IGNORE INTO Material (CodigoMaterial, DescricaoMaterial) VALUES (?, ?)`
+
+	res, err = db.Exec(insertMaterialQuery, o.CodigoMaterial, o.DescricaoMaterial)
+	if err != nil {
+		return err
+	}
+
+	var IDMaterial int64
+	IDMaterial, err = res.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	insertQuery := `INSERT OR IGNORE INTO OrdemProducao (DataEntrega, CodigoOrdemProducao, IDCliente, IDMaterial, Quantidade) VALUES (?, ?, ?, ?, ?);`
 
 
-	res, err := db.Exec(insertQuery, o.DataEntrega, o.CodigoOrdemProducao, o.Cliente, o.CodigoMaterial, o.DescricaoMaterial, o.Quantidade)
+	res, err = db.Exec(insertQuery, o.DataEntrega, o.CodigoOrdemProducao, IDCliente, IDMaterial, o.Quantidade)
 	if err != nil {
 		return err
 	}
