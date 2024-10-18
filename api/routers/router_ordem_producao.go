@@ -22,7 +22,7 @@ func RoutersOrdemProducao(routers *mux.Router, base string) *mux.Router {
 }
 
 func CreateTableOrdemProducaoHandler(w http.ResponseWriter, r *http.Request) {
-	db, err := connection.OpenConnection()
+	db, err := connection.TursoConnect()
 	if err != nil {
 		log.Fatalf("Error opening database connection: %v", err)
 		return
@@ -39,7 +39,7 @@ func CreateTableOrdemProducaoHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetOrdemProducaoHandler(w http.ResponseWriter, r *http.Request) {
-	db, err := connection.OpenConnection()
+	db, err := connection.TursoConnect()
 	if err != nil {
 		log.Fatalf("Error opening database connection: %v", err)
 		http.Error(w, "Error opening database connection", http.StatusInternalServerError)
@@ -64,7 +64,7 @@ func GetOrdemProducaoHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateOrdemProducaoHandler(w http.ResponseWriter, r *http.Request) {
-	db, err := connection.OpenConnection()
+	db, err := connection.TursoConnect()
 	if err != nil {
 		log.Fatalf("Error opening database connection: %v", err)
 		http.Error(w, "Error opening database connection", http.StatusInternalServerError)
