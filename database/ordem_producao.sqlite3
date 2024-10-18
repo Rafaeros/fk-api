@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS OrdemProducao (
 		IDOrdemProducao INTEGER PRIMARY KEY,
 		DataEntrega TEXT,
-		CodigoOrdemProducao INTEGER,
+		CodigoOrdemProducao INTEGER UNIQUE,
 		Cliente TEXT,
 		CodigoMaterial TEXT,
 		DescricaoMaterial TEXT,
