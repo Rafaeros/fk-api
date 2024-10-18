@@ -77,22 +77,24 @@ func CreateOrdemProducaoHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	var o models.OrdemProducao
-	err = json.NewDecoder(r.Body).Decode(&o)
+	var ordens models.OrdensDeProducao
+	err = json.NewDecoder(r.Body).Decode(&ordens)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error reading json: %v", err), http.StatusNotAcceptable)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	newOrdemProducao, err := models.CreateOrdemProducao(db, o)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Error creating OrdemProducao: %v", err), http.StatusInternalServerError)
-		return
+	for _, ordem := range ordens.Ordens {
+		err = ordem.CreateOrdemProducao(db)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Error creating OrdemProducao: %v", err), http.StatusInternalServerError)
+			return
+		}
 	}
+
 
 	// convert to json
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(newOrdemProducao)
 	w.WriteHeader(http.StatusCreated)
 	fmt.Fprintf(w, "OrdemProducao created successfully")
 }
