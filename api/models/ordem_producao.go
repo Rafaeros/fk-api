@@ -16,6 +16,7 @@ type OrdemProducao struct {
 	DataCriacao         time.Time `json:"dataCriacao"`
 	DataAtualizacao     time.Time `json:"dataAtualizacao"`
 	IsAtivo             bool      `json:"isAtivo"`
+	IDCliente           int64     `id:"IDCliente"`
 }
 
 type OrdensDeProducao struct {
@@ -25,35 +26,45 @@ type OrdensDeProducao struct {
 func CreateTableOrdemProducao(db *sql.DB) error {
 
 	_, err := db.Exec(`
-	CREATE TABLE IF NOT EXISTS OrdemProducao (
+		CREATE TABLE IF NOT EXISTS OrdemProducao (
 		IDOrdemProducao INTEGER PRIMARY KEY,
 		DataEntrega TEXT,
 		CodigoOrdemProducao INTEGER UNIQUE,
-		Cliente TEXT,
 		CodigoMaterial TEXT,
 		DescricaoMaterial TEXT,
 		Quantidade INTEGER,
 		DataCriacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		DataAtualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-		IsAtivo BOOLEAN DEFAULT TRUE
+		IsAtivo BOOLEAN DEFAULT TRUE,
+		IDCliente INTEGER,
+		FOREIGN KEY (IDCliente) REFERENCES Cliente(IDCliente)
+		);
+
+		CREATE TABLE IF NOT EXISTS CLIENTE (
+		IDCliente INTEGER PRIMARY KEY,
+		Nome TEXT UNIQUE
 		);
 	`)
+	if err != nil {
+		return err
+	}
 
-	return err
+	return nil
 }
 
 func GetOrdemProducao(db *sql.DB) ([]OrdemProducao, error) {
 
-	query := `SELECT IDOrdemProducao, 
+	query := `SELECT 
+		IDOrdemProducao, 
 		DataEntrega,
 		CodigoOrdemProducao,
-		Cliente,
 		CodigoMaterial,
 	  	DescricaoMaterial,
 	   	Quantidade,
-	    DataCriacao,
+		DataCriacao,
 		DataAtualizacao,
-		IsAtivo FROM OrdemProducao`
+		IsAtivo,
+		IDCliente FROM OrdemProducao`
 
 	rows, err := db.Query(query)
 	if err != nil {
@@ -68,13 +79,13 @@ func GetOrdemProducao(db *sql.DB) ([]OrdemProducao, error) {
 			&o.IDOrdemProducao,
 			&o.DataEntrega,
 			&o.CodigoOrdemProducao,
-			&o.Cliente,
 			&o.CodigoMaterial,
 			&o.DescricaoMaterial,
 			&o.Quantidade,
 			&o.DataCriacao,
 			&o.DataAtualizacao,
 			&o.IsAtivo,
+			&o.IDCliente,
 		)
 		if err != nil {
 			return nil, err
@@ -90,10 +101,15 @@ func GetOrdemProducao(db *sql.DB) ([]OrdemProducao, error) {
 
 func (o *OrdemProducao) CreateOrdemProducao(db *sql.DB) error {
 
-	insertQuery := `INSERT INTO OrdemProducao (DataEntrega, CodigoOrdemProducao, Cliente, CodigoMaterial, DescricaoMaterial, Quantidade) VALUES (?, ?, ?, ?, ?, ?);`
+	// Get or Create IDCLIENTE
+	IDCliente, err := CreateCliente(db, o.Cliente)
+	if err != nil {
+		return err
+	}
 
+	insertQuery := `INSERT INTO OrdemProducao (DataEntrega, CodigoOrdemProducao, CodigoMaterial, DescricaoMaterial, Quantidade, IDCliente) VALUES (?, ?, ?, ?, ?, ?);`
 
-	res, err := db.Exec(insertQuery, o.DataEntrega, o.CodigoOrdemProducao, o.Cliente, o.CodigoMaterial, o.DescricaoMaterial, o.Quantidade)
+	res, err := db.Exec(insertQuery, o.DataEntrega, o.CodigoOrdemProducao, o.CodigoMaterial, o.DescricaoMaterial, o.Quantidade, IDCliente)
 	if err != nil {
 		return err
 	}
@@ -102,7 +118,7 @@ func (o *OrdemProducao) CreateOrdemProducao(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	
+
 	o.IDOrdemProducao = id
 	return nil
 }
