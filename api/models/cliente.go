@@ -37,7 +37,7 @@ func CreateCliente(db *sql.DB, NomeCliente string) (int64, error) {
 	insertQuery := `INSERT INTO CLIENTE (Nome) VALUES (?);`
 	res, err := db.Exec(insertQuery, NomeCliente)
 	if err != nil {
-		if err.Error() == "UNIQUE constraint failed: CLIENTE.Nome" {
+		if err.Error() == "UNIQUE constraint failed: Cliente.Nome" {
 			getQuery := `SELECT IDCliente FROM CLIENTE WHERE Nome = ?;`
 			err := db.QueryRow(getQuery, NomeCliente).Scan(&IDCliente)
 			if err != nil {
