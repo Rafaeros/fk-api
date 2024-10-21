@@ -15,6 +15,7 @@ func main() {
 		
 	log.Println("Setting up routes")
 	r = routers.RoutersOrdemProducao(r, basePath)
+	r = routers.RoutersCliente(r, basePath)
 
 
 	log.Println("Setting up handlers")
