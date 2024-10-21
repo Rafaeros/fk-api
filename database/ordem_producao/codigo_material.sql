@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS Material (
+	IDMaterial INTEGER PRIMARY KEY,
+	CodigoMaterial TEXT UNIQUE,
+	DescricaoMaterial TEXT UNIQUE
+);
